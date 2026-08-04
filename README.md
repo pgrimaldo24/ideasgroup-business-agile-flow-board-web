@@ -186,12 +186,15 @@ Hasta el momento: análisis del enunciado, selección y verificación de compati
 - [x] Instalación y verificación de dependencias
 - [x] Arquitectura de carpetas, rutas diferidas y providers base
 - [x] Configuración externa por archivos de entorno
-- [ ] Integración de la plantilla Sakai
-- [ ] Autenticación: login, guard de ruta e interceptor JWT
+- [x] Autenticación: login contra la API, guard de ruta e interceptor JWT
+- [x] Sesión con expiración automática por `expiresAtUtc`
+- [x] Shell de la aplicación: topbar, barra lateral y menú
+- [x] Componentes reutilizables: botón, campo de texto, tarjeta, grupo de formulario, diálogo, avatar y etiqueta
+- [x] Interfaz del tablero kanban con columnas, tarjetas y creación de tareas
+- [ ] Conexión del tablero y los proyectos con la API
 - [ ] Gestión de proyectos (CRUD, paginación y filtro en servidor)
 - [ ] Columnas configurables del flujo de trabajo
-- [ ] Gestión de tareas
-- [ ] Tablero kanban con drag & drop y actualización optimista
+- [ ] Drag & drop con persistencia del orden y actualización optimista
 - [ ] Sincronización en tiempo real
 - [ ] Descarga de reportes PDF y Excel
 - [ ] Pruebas unitarias
