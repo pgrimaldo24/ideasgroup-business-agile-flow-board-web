@@ -1,0 +1,27 @@
+<label class="field__label" [attr.for]="inputId">
+  {{ label }}
+  @if (required) {
+    <span class="field__required" aria-hidden="true">*</span>
+  }
+</label>
+
+<input
+  pInputText
+  class="field__control"
+  [id]="inputId"
+  [type]="type"
+  [value]="value"
+  [placeholder]="placeholder"
+  [disabled]="disabled"
+  [attr.autocomplete]="autocomplete || null"
+  [attr.required]="required || null"
+  [attr.aria-invalid]="errorMessage !== null"
+  [attr.aria-describedby]="errorMessage ? inputId + '-error' : null"
+  [class.field__control--invalid]="errorMessage !== null"
+  (input)="onInput($event)"
+  (blur)="onBlur()"
+/>
+
+@if (errorMessage) {
+  <small class="field__error" [id]="inputId + '-error'" role="alert">{{ errorMessage }}</small>
+}

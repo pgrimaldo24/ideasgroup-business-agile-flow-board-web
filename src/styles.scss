@@ -1,1 +1,18 @@
-/* You can add global styles to this file, and also import other style files */
+/* Estilos globales de la aplicación.
+   El orden de los temas de PrimeNG, PrimeIcons y PrimeFlex se define en
+   angular.json; aquí solo van los ajustes propios. */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--surface-ground);
+  color: var(--text-color);
+}
+
+/* Contenedor temporal de las páginas aún no implementadas.
+   Se elimina al integrar el layout de Sakai. */
+.page-placeholder {
+  padding: 2rem;
+}

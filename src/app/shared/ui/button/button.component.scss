@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+/* El tema de PrimeNG se ajusta desde el propio wrapper y no globalmente, para
+   que la personalización viaje con el componente y no afecte a terceros. */
+:host ::ng-deep {
+  .p-button {
+    border-radius: 3px;
+    font-weight: 500;
+  }
+
+  .app-button--primary {
+    background: #0c66e4;
+    border-color: #0c66e4;
+
+    &:enabled:hover {
+      background: #0055cc;
+      border-color: #0055cc;
+    }
+
+    &:enabled:focus {
+      box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #0c66e4;
+    }
+  }
+
+  .app-button--secondary {
+    color: #172b4d;
+    border-color: #8590a2;
+
+    &:enabled:hover {
+      background: #f1f2f4;
+    }
+  }
+}

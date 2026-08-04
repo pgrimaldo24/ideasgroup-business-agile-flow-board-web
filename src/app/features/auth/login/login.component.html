@@ -1,0 +1,56 @@
+<div class="login">
+  <img class="login__art login__art--left" src="assets/images/login-left.svg" alt="" aria-hidden="true" />
+  <img class="login__art login__art--right" src="assets/images/login-right.svg" alt="" aria-hidden="true" />
+
+  <main class="login__card">
+    <header class="login__brand">
+      <span class="login__brand-icon">
+        <i class="pi pi-th-large" aria-hidden="true"></i>
+      </span>
+      <span class="login__brand-name">AgileFlowBoard</span>
+    </header>
+
+    <h1 class="login__title">Inicia sesión para continuar</h1>
+
+    <form class="login__form" [formGroup]="form" (ngSubmit)="submit()">
+      <app-text-input
+        formControlName="email"
+        label="Correo"
+        type="email"
+        placeholder="Introduce tu correo electrónico"
+        autocomplete="email"
+        required
+        [errorMessages]="emailErrors"
+      />
+
+      <app-text-input
+        formControlName="password"
+        label="Contraseña"
+        type="password"
+        placeholder="Introduce tu contraseña"
+        autocomplete="current-password"
+        required
+        [errorMessages]="passwordErrors"
+      />
+
+      <div class="login__remember">
+        <p-checkbox formControlName="rememberMe" inputId="rememberMe" [binary]="true" />
+        <label class="login__remember-label" for="rememberMe">Recordarme</label>
+        <i
+          class="pi pi-info-circle login__info"
+          tabindex="0"
+          role="img"
+          aria-label="Mantiene la sesión iniciada en este navegador"
+          pTooltip="Mantiene la sesión iniciada en este navegador"
+          tooltipPosition="top"
+        ></i>
+      </div>
+
+      <app-button label="Continuar" type="submit" variant="primary" fullWidth />
+    </form>
+
+    <footer class="login__footer">
+      <span class="login__footer-brand">IDEASGROUP</span>
+    </footer>
+  </main>
+</div>
