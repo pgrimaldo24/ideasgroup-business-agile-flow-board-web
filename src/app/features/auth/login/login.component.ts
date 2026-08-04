@@ -1,7 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CheckboxModule } from 'primeng/checkbox';
-import { TooltipModule } from 'primeng/tooltip';
 
 import { ButtonComponent } from '@shared/ui/button/button.component';
 import { TextInputComponent } from '@shared/ui/text-input/text-input.component';
@@ -16,7 +14,7 @@ import { TextInputComponent } from '@shared/ui/text-input/text-input.component';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CheckboxModule, TooltipModule, ButtonComponent, TextInputComponent],
+  imports: [ReactiveFormsModule, ButtonComponent, TextInputComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,8 +24,7 @@ export class LoginComponent {
 
   protected readonly form = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required]],
-    rememberMe: [false]
+    password: ['', [Validators.required]]
   });
 
   protected readonly emailErrors: Record<string, string> = {
