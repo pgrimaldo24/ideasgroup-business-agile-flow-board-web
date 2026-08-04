@@ -12,6 +12,13 @@
 
     <h1 class="login__title">Inicia sesión para continuar</h1>
 
+    @if (errorMessage(); as message) {
+      <div class="login__alert" role="alert">
+        <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+        <span>{{ message }}</span>
+      </div>
+    }
+
     <form class="login__form" [formGroup]="form" (ngSubmit)="submit()">
       <app-text-input
         formControlName="email"
@@ -33,7 +40,14 @@
         [errorMessages]="passwordErrors"
       />
 
-      <app-button class="login__submit" label="Continuar" type="submit" variant="primary" fullWidth />
+      <app-button
+        class="login__submit"
+        label="Continuar"
+        type="submit"
+        variant="primary"
+        fullWidth
+        [loading]="submitting()"
+      />
     </form>
 
     <footer class="login__footer">

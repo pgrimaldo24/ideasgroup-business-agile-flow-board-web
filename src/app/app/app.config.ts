@@ -1,27 +1,27 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
-import { environment } from '@env/environment';
+import { AUTH_PORT } from '@core/application/ports/auth/auth.port';
+import { SESSION_STORAGE_PORT } from '@core/application/ports/auth/session-storage.port';
+import { provideSessionExpiryRedirect } from '@core/infrastructure/auth/session-expiry.provider';
 import { provideAppConfig } from '@core/infrastructure/config/app-config.token';
+import { authInterceptor } from '@core/infrastructure/interceptors/auth.interceptor';
+import { AuthHttpAdapter } from '@core/infrastructure/http/auth/auth-http.adapter';
+import { BrowserSessionStorageAdapter } from '@core/infrastructure/storage/browser-session-storage.adapter';
+import { environment } from '@env/environment';
+
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // `withComponentInputBinding` enlaza los parámetros de ruta (p. ej. :projectId)
-    // directamente a los @Input del componente, evitando inyectar ActivatedRoute
-    // y suscribirse manualmente dentro de las páginas.
     provideRouter(routes, withComponentInputBinding()),
-
-    // `withFetch` usa la Fetch API en lugar de XMLHttpRequest.
-    // Los interceptores (JWT y manejo de 401) se registran aquí al implementar
-    // el módulo de autenticación.
-    provideHttpClient(withFetch()),
-
-    // Requerido por los componentes de PrimeNG que usan transiciones.
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     provideAnimations(),
-
-    provideAppConfig(environment)
+    provideAppConfig(environment),
+    { provide: AUTH_PORT, useClass: AuthHttpAdapter },
+    { provide: SESSION_STORAGE_PORT, useClass: BrowserSessionStorageAdapter },
+    provideSessionExpiryRedirect()
   ]
 };

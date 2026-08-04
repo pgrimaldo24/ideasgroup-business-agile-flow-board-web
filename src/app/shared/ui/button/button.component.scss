@@ -2,8 +2,6 @@
   display: block;
 }
 
-/* El tema de PrimeNG se ajusta desde el propio wrapper y no globalmente, para
-   que la personalización viaje con el componente y no afecte a terceros. */
 :host ::ng-deep {
   .p-button {
     border-radius: 3px;

@@ -2,26 +2,12 @@ import { ChangeDetectorRef, Component, Input, Optional, Self, booleanAttribute, 
 import { ControlValueAccessor, NgControl } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 
+import { ValidationMessages } from '@shared/utils/validation-messages';
+
 export type TextInputType = 'text' | 'email' | 'password';
 
-/** Contador para generar identificadores únicos cuando no se proporciona uno. */
 let uniqueId = 0;
 
-/**
- * Campo de texto reutilizable.
- *
- * Envuelve la directiva `pInputText` de PrimeNG e implementa
- * `ControlValueAccessor`, de modo que se integra con formularios reactivos
- * mediante `formControlName` como cualquier control nativo.
- *
- * El accesor se registra inyectando `NgControl` con `@Self()` en lugar de
- * declarar `NG_VALUE_ACCESSOR`: así se evita la dependencia circular y el
- * componente conserva acceso al control para leer su estado de validación.
- *
- * Usa detección de cambios por defecto de forma deliberada. Con `OnPush`, las
- * transiciones de estado que no emiten eventos —`markAllAsTouched()` al enviar
- * el formulario— no repintarían el mensaje de error.
- */
 @Component({
   selector: 'app-text-input',
   standalone: true,
@@ -32,27 +18,12 @@ let uniqueId = 0;
 export class TextInputComponent implements ControlValueAccessor {
   private readonly changeDetector = inject(ChangeDetectorRef);
 
-  /** Etiqueta visible sobre el campo. */
   @Input({ required: true }) label = '';
-
-  /** Texto de ayuda dentro del campo mientras está vacío. */
   @Input() placeholder = '';
-
   @Input() type: TextInputType = 'text';
-
-  /** Marca el campo con asterisco y lo anuncia a los lectores de pantalla. */
   @Input({ transform: booleanAttribute }) required = false;
-
-  /** Valor del atributo `autocomplete` del navegador. */
   @Input() autocomplete = '';
-
-  /** Identificador del input; enlaza la etiqueta con el campo. */
   @Input() inputId = `app-text-input-${uniqueId++}`;
-
-  /**
-   * Mensajes por clave de error del validador.
-   * Ejemplo: `{ required: 'El correo es obligatorio' }`
-   */
   @Input() errorMessages: Record<string, string> = {};
 
   protected value = '';
@@ -67,7 +38,6 @@ export class TextInputComponent implements ControlValueAccessor {
     }
   }
 
-  /** Mensaje a mostrar, o `null` si el campo aún no debe reportar error. */
   protected get errorMessage(): string | null {
     const control = this.ngControl?.control;
 
@@ -77,7 +47,7 @@ export class TextInputComponent implements ControlValueAccessor {
 
     const [firstError] = Object.keys(control.errors);
 
-    return this.errorMessages[firstError] ?? 'El valor introducido no es válido';
+    return ValidationMessages.resolve(firstError, this.errorMessages);
   }
 
   protected onInput(event: Event): void {

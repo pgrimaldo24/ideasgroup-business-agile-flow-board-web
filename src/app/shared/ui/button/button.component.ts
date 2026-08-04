@@ -11,14 +11,6 @@ import { ButtonModule } from 'primeng/button';
 export type ButtonVariant = 'primary' | 'secondary' | 'text';
 export type ButtonType = 'button' | 'submit' | 'reset';
 
-/**
- * Botón reutilizable de la aplicación.
- *
- * Envuelve `p-button` de PrimeNG para que el resto del proyecto dependa de
- * esta API y no de la de la librería: si mañana se cambia PrimeNG por otra
- * cosa, solo se reescribe este archivo. Es el mismo principio de puertos y
- * adaptadores aplicado a la capa de presentación.
- */
 @Component({
   selector: 'app-button',
   standalone: true,
@@ -29,20 +21,11 @@ export type ButtonType = 'button' | 'submit' | 'reset';
 })
 export class ButtonComponent {
   @Input({ required: true }) label = '';
-
   @Input() type: ButtonType = 'button';
-
   @Input() variant: ButtonVariant = 'primary';
-
-  /** Clase de PrimeIcons, por ejemplo `pi pi-plus`. */
   @Input() icon = '';
-
   @Input({ transform: booleanAttribute }) disabled = false;
-
-  /** Muestra el indicador de carga y bloquea la interacción. */
   @Input({ transform: booleanAttribute }) loading = false;
-
-  /** Ocupa todo el ancho del contenedor. */
   @Input({ transform: booleanAttribute }) fullWidth = false;
 
   @Output() readonly clicked = new EventEmitter<MouseEvent>();

@@ -1,7 +1,3 @@
-/* Estilos globales de la aplicación.
-   El orden de los temas de PrimeNG, PrimeIcons y PrimeFlex se define en
-   angular.json; aquí solo van los ajustes propios. */
-
 html,
 body {
   height: 100%;
@@ -11,8 +7,6 @@ body {
   color: var(--text-color);
 }
 
-/* Contenedor temporal de las páginas aún no implementadas.
-   Se elimina al integrar el layout de Sakai. */
 .page-placeholder {
   padding: 2rem;
 }
