@@ -1,0 +1,33 @@
+:host {
+  display: block;
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #ffffff;
+}
+
+.layout__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.layout__sidebar {
+  flex: 0 0 15rem;
+  width: 15rem;
+}
+
+.layout__content {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+
+@media (max-width: 768px) {
+  .layout__sidebar {
+    display: none;
+  }
+}

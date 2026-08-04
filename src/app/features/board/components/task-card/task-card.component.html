@@ -1,0 +1,17 @@
+<app-card interactive flat (click)="selected.emit(task)">
+  <p class="task__title">{{ task.title }}</p>
+
+  <div class="task__meta">
+    <span class="task__reference">
+      <i class="pi pi-check-square" aria-hidden="true"></i>
+      {{ task.reference }}
+    </span>
+
+    <app-tag
+      [label]="priorityLabel[task.priority]"
+      [severity]="prioritySeverity[task.priority]"
+    />
+
+    <app-avatar class="task__assignee" [fullName]="task.assigneeName" />
+  </div>
+</app-card>

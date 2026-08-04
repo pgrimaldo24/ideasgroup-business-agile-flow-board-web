@@ -1,0 +1,23 @@
+:host {
+  display: inline-flex;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  user-select: none;
+
+  &--medium {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.75rem;
+  }
+}

@@ -18,7 +18,7 @@ let uniqueId = 0;
 export class TextInputComponent implements ControlValueAccessor {
   private readonly changeDetector = inject(ChangeDetectorRef);
 
-  @Input({ required: true }) label = '';
+  @Input() label = '';
   @Input() placeholder = '';
   @Input() type: TextInputType = 'text';
   @Input({ transform: booleanAttribute }) required = false;

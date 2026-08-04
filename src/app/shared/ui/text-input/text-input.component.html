@@ -1,9 +1,11 @@
-<label class="field__label" [attr.for]="inputId">
-  {{ label }}
-  @if (required) {
-    <span class="field__required" aria-hidden="true">*</span>
-  }
-</label>
+@if (label) {
+  <label class="field__label" [attr.for]="inputId">
+    {{ label }}
+    @if (required) {
+      <span class="field__required" aria-hidden="true">*</span>
+    }
+  </label>
+}
 
 <input
   pInputText

@@ -1,0 +1,116 @@
+:host {
+  display: block;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  height: 3.5rem;
+  background: #ffffff;
+  border-bottom: 1px solid #dfe1e6;
+}
+
+.topbar__start,
+.topbar__end {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  padding: 0 0.75rem;
+}
+
+.topbar__start {
+  flex: 0 0 15rem;
+  width: 15rem;
+}
+
+.topbar__center {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+  padding-left: 1rem;
+}
+
+.topbar__icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: #44546f;
+  cursor: pointer;
+
+  &:hover {
+    background: #f1f2f4;
+  }
+}
+
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.topbar__brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 4px;
+  background: #0c66e4;
+  color: #ffffff;
+  font-size: 0.75rem;
+}
+
+.topbar__brand-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #172b4d;
+  white-space: nowrap;
+}
+
+.topbar__search {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-width: 45rem;
+
+  i {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    z-index: 1;
+    transform: translateY(-50%);
+    color: #626f86;
+    font-size: 0.875rem;
+  }
+
+  ::ng-deep .field__control {
+    padding-left: 2.25rem;
+    border-radius: 3px;
+  }
+}
+
+@media (max-width: 768px) {
+  .topbar__start {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .topbar__center {
+    padding-left: 0;
+  }
+
+  .topbar__brand-name,
+  .topbar__search {
+    display: none;
+  }
+}

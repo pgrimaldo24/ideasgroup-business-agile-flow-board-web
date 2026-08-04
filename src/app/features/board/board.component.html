@@ -1,5 +1,62 @@
-<section class="page-placeholder">
-  <h1>Tablero</h1>
-  <p>Proyecto: {{ projectId }}</p>
-  <p>Pendiente de implementar: columnas, tarjetas, arrastre y sincronización en tiempo real.</p>
-</section>
+<div class="board">
+  <header class="board__header">
+    <p class="board__breadcrumb">Proyectos</p>
+
+    <div class="board__title-row">
+      <h1 class="board__title">{{ projectName }}</h1>
+      <app-button label="Crear tarea" icon="pi pi-plus" variant="secondary" (clicked)="openTaskDialog(columns()[0])" />
+    </div>
+  </header>
+
+  <div class="board__toolbar">
+    <div class="board__search">
+      <i class="pi pi-search" aria-hidden="true"></i>
+      <app-text-input [formControl]="search" placeholder="Buscar en el tablero" inputId="board-search" />
+    </div>
+
+    <div class="board__members">
+      @for (member of members; track member) {
+        <app-avatar [fullName]="member" />
+      }
+    </div>
+  </div>
+
+  <div class="board__columns">
+    @for (column of columns(); track column.id) {
+      <app-board-column
+        [column]="column"
+        [tasks]="tasksOf(column)"
+        (taskCreated)="openTaskDialog($event)"
+      />
+    }
+  </div>
+</div>
+
+<app-dialog
+  header="Crear tarea"
+  confirmLabel="Crear"
+  [visible]="dialogVisible()"
+  (visibleChange)="dialogVisible.set($event)"
+  (cancelled)="closeTaskDialog()"
+  (confirmed)="createTask()"
+>
+  <form [formGroup]="taskForm">
+    <app-form-group legend="Detalle de la tarea" description="La tarea se añade a la columna seleccionada.">
+      <app-text-input
+        formControlName="title"
+        label="Título"
+        placeholder="Describe brevemente la tarea"
+        required
+        [errorMessages]="titleErrors"
+      />
+
+      <app-text-input
+        formControlName="assigneeName"
+        label="Responsable"
+        placeholder="Nombre del responsable"
+        required
+        [errorMessages]="assigneeErrors"
+      />
+    </app-form-group>
+  </form>
+</app-dialog>

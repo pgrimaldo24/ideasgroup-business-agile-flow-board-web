@@ -1,0 +1,13 @@
+<fieldset class="form-group">
+  @if (legend) {
+    <legend class="form-group__legend">{{ legend }}</legend>
+  }
+
+  @if (description) {
+    <p class="form-group__description">{{ description }}</p>
+  }
+
+  <div class="form-group__fields" [style.grid-template-columns]="'repeat(' + columns + ', 1fr)'">
+    <ng-content />
+  </div>
+</fieldset>

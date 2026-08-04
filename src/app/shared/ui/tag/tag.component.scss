@@ -1,0 +1,41 @@
+:host {
+  display: inline-flex;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &--neutral {
+    background: #dcdfe4;
+    color: #44546f;
+  }
+
+  &--info {
+    background: #e9f2ff;
+    color: #0055cc;
+  }
+
+  &--success {
+    background: #dcfff1;
+    color: #216e4e;
+  }
+
+  &--warning {
+    background: #fff7d6;
+    color: #a54800;
+  }
+
+  &--danger {
+    background: #ffeceb;
+    color: #ae2e24;
+  }
+}

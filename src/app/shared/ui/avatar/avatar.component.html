@@ -1,0 +1,10 @@
+<span
+  class="avatar"
+  [class.avatar--medium]="size === 'medium'"
+  [style.background-color]="color()"
+  [attr.title]="fullName"
+  [attr.aria-label]="fullName"
+  role="img"
+>
+  {{ initials() }}
+</span>

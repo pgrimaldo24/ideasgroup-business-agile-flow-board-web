@@ -1,0 +1,14 @@
+<article class="card" [class.card--interactive]="interactive" [class.card--flat]="flat">
+  @if (heading) {
+    <header class="card__header">
+      <h3 class="card__heading">{{ heading }}</h3>
+      <ng-content select="[cardActions]" />
+    </header>
+  }
+
+  <div class="card__body">
+    <ng-content />
+  </div>
+
+  <ng-content select="[cardFooter]" />
+</article>

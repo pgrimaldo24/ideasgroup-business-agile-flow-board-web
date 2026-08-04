@@ -1,0 +1,28 @@
+<p-dialog
+  styleClass="app-dialog"
+  [header]="header"
+  [visible]="visible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [dismissableMask]="true"
+  [style]="{ width: width }"
+  (visibleChange)="onVisibleChange($event)"
+>
+  <ng-content />
+
+  @if (!hideFooter) {
+    <ng-template pTemplate="footer">
+      <div class="app-dialog__actions">
+        <app-button [label]="cancelLabel" variant="secondary" (clicked)="close()" />
+        <app-button
+          [label]="confirmLabel"
+          variant="primary"
+          [loading]="loading"
+          [disabled]="confirmDisabled"
+          (clicked)="confirmed.emit()"
+        />
+      </div>
+    </ng-template>
+  }
+</p-dialog>
