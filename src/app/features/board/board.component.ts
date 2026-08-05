@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, Input, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { ChangeDetectionStrategy, Component, Input, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
+import { BoardStore } from '@core/application/state/board/board.store';
 import { BoardColumn } from '@core/domain/models/board/board-column.model';
 import { KanbanTask } from '@core/domain/models/board/kanban-task.model';
 import { AvatarComponent } from '@shared/ui/avatar/avatar.component';
@@ -18,6 +20,7 @@ import { BOARD_PLACEHOLDER } from './board.placeholder';
   selector: 'app-board',
   standalone: true,
   imports: [
+    DragDropModule,
     ReactiveFormsModule,
     AvatarComponent,
     BoardColumnComponent,
@@ -26,6 +29,7 @@ import { BOARD_PLACEHOLDER } from './board.placeholder';
     FormGroupComponent,
     TextInputComponent
   ],
+  providers: [BoardStore],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,21 +37,20 @@ import { BOARD_PLACEHOLDER } from './board.placeholder';
 export class BoardComponent {
   private readonly formBuilder = inject(FormBuilder);
 
+  protected readonly store = inject(BoardStore);
+
   @Input() projectId = '';
 
   protected readonly projectName = BOARD_PLACEHOLDER.projectName;
-  protected readonly columns = signal<readonly BoardColumn[]>(BOARD_PLACEHOLDER.columns);
-  protected readonly tasks = signal<readonly KanbanTask[]>(BOARD_PLACEHOLDER.tasks);
   protected readonly members = BOARD_PLACEHOLDER.members;
 
   protected readonly dialogVisible = signal(false);
 
   protected readonly titleErrors = BoardMessages.title;
   protected readonly assigneeErrors = BoardMessages.assignee;
+  protected readonly reorderError = BoardMessages.reorderFailed;
 
   protected readonly search = this.formBuilder.nonNullable.control('');
-
-  private readonly searchTerm = toSignal(this.search.valueChanges, { initialValue: '' });
 
   protected readonly taskForm = this.formBuilder.nonNullable.group({
     title: ['', [Validators.required]],
@@ -56,23 +59,19 @@ export class BoardComponent {
 
   private readonly targetColumn = signal<BoardColumn | null>(null);
 
-  protected readonly visibleTasks = computed(() => {
-    const term = this.searchTerm().trim().toLowerCase();
+  constructor() {
+    this.store.load(BOARD_PLACEHOLDER.columns, BOARD_PLACEHOLDER.tasks);
 
-    if (!term) {
-      return this.tasks();
-    }
-
-    return this.tasks().filter((task) => task.title.toLowerCase().includes(term));
-  });
-
-  protected tasksOf(column: BoardColumn): readonly KanbanTask[] {
-    return this.visibleTasks()
-      .filter((task) => task.columnId === column.id)
-      .sort((left, right) => left.position - right.position);
+    this.search.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe((term) => this.store.search(term));
   }
 
-  protected openTaskDialog(column: BoardColumn): void {
+  protected openTaskDialog(column: BoardColumn | undefined): void {
+    if (!column) {
+      return;
+    }
+
     this.targetColumn.set(column);
     this.taskForm.reset();
     this.dialogVisible.set(true);
@@ -93,21 +92,20 @@ export class BoardComponent {
     }
 
     const { title, assigneeName } = this.taskForm.getRawValue();
-    const existing = this.tasks().filter((task) => task.columnId === column.id);
 
     const created: KanbanTask = {
       id: crypto.randomUUID(),
-      reference: `AFB-${this.tasks().length + 1}`,
+      reference: `AFB-${this.store.tasks().length + 1}`,
       title,
       description: '',
       priority: 'medium',
       assigneeName,
       columnId: column.id,
-      position: existing.length,
+      position: this.store.nextPosition(column.id),
       createdAt: new Date()
     };
 
-    this.tasks.update((tasks) => [...tasks, created]);
+    this.store.addTask(created);
     this.closeTaskDialog();
   }
 }

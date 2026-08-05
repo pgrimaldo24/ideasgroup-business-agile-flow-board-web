@@ -4,14 +4,23 @@
 
     <div class="board__title-row">
       <h1 class="board__title">{{ projectName }}</h1>
-      <app-button label="Crear tarea" icon="pi pi-plus" variant="secondary" (clicked)="openTaskDialog(columns()[0])" />
+      <app-button
+        label="Crear tarea"
+        icon="pi pi-plus"
+        variant="secondary"
+        (clicked)="openTaskDialog(store.columns()[0])"
+      />
     </div>
   </header>
 
   <div class="board__toolbar">
     <div class="board__search">
       <i class="pi pi-search" aria-hidden="true"></i>
-      <app-text-input [formControl]="search" placeholder="Buscar en el tablero" inputId="board-search" />
+      <app-text-input
+        [formControl]="search"
+        placeholder="Buscar en el tablero"
+        inputId="board-search"
+      />
     </div>
 
     <div class="board__members">
@@ -21,12 +30,28 @@
     </div>
   </div>
 
-  <div class="board__columns">
-    @for (column of columns(); track column.id) {
+  @if (store.reorderFailed()) {
+    <div class="board__alert" role="alert">
+      <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+      <span>{{ reorderError }}</span>
+      <button
+        class="board__alert-close"
+        type="button"
+        aria-label="Cerrar aviso"
+        (click)="store.dismissReorderError()"
+      >
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
+    </div>
+  }
+
+  <div class="board__columns" cdkDropListGroup>
+    @for (column of store.columns(); track column.id) {
       <app-board-column
         [column]="column"
-        [tasks]="tasksOf(column)"
+        [tasks]="store.tasksByColumn().get(column.id) ?? []"
         (taskCreated)="openTaskDialog($event)"
+        (taskMoved)="store.moveTask($event)"
       />
     }
   </div>
@@ -41,7 +66,10 @@
   (confirmed)="createTask()"
 >
   <form [formGroup]="taskForm">
-    <app-form-group legend="Detalle de la tarea" description="La tarea se añade a la columna seleccionada.">
+    <app-form-group
+      legend="Detalle de la tarea"
+      description="La tarea se añade al final de la columna seleccionada."
+    >
       <app-text-input
         formControlName="title"
         label="Título"

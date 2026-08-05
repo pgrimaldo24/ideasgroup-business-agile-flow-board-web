@@ -1,5 +1,10 @@
 :host {
   display: block;
+  cursor: grab;
+}
+
+:host(.cdk-drag-dragging) {
+  cursor: grabbing;
 }
 
 .task__title {

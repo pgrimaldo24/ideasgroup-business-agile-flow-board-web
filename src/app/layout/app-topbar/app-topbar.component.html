@@ -1,11 +1,7 @@
 <header class="topbar">
   <div class="topbar__start">
-    <button
-      class="topbar__icon-button"
-      type="button"
-      aria-label="Mostrar u ocultar el menú lateral"
-      (click)="toggleSidebar()"
-    >
+    <button class="topbar__icon-button" type="button" aria-label="Mostrar u ocultar el menú lateral"
+      (click)="toggleSidebar()">
       <i class="pi pi-bars" aria-hidden="true"></i>
     </button>
 
@@ -25,12 +21,16 @@
   </div>
 
   <div class="topbar__end">
-    <button class="topbar__icon-button" type="button" aria-label="Cerrar sesión" (click)="logout()">
-      <i class="pi pi-sign-out" aria-hidden="true"></i>
-    </button>
 
     @if (userName()) {
+    <span class="topbar__user">
+      <span class="topbar__user-name">{{ userName() }}</span>
+      <button class="topbar__icon-button" type="button" aria-label="Cerrar sesión" (click)="logout()">
+        <i class="pi pi-sign-out" aria-hidden="true"></i>
+      </button>
       <app-avatar size="medium" [fullName]="userName()" />
+    </span>
     }
+    
   </div>
 </header>

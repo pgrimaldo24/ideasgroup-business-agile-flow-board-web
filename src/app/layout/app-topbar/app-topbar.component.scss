@@ -30,7 +30,12 @@
   gap: 0.75rem;
   flex: 1;
   min-width: 0;
-  padding-left: 1rem;
+
+  ::ng-deep .p-button {
+    height: 2rem;
+    padding: 0 0.875rem;
+    font-size: 0.875rem;
+  }
 }
 
 .topbar__icon-button {
@@ -49,6 +54,20 @@
   &:hover {
     background: #f1f2f4;
   }
+}
+
+.topbar__user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 0.25rem;
+}
+
+.topbar__user-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #172b4d;
+  white-space: nowrap;
 }
 
 .topbar__brand {
@@ -81,7 +100,7 @@
   position: relative;
   flex: 1;
   min-width: 0;
-  max-width: 45rem;
+  max-width: 60rem;
 
   i {
     position: absolute;
@@ -90,12 +109,14 @@
     z-index: 1;
     transform: translateY(-50%);
     color: #626f86;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
   }
 
   ::ng-deep .field__control {
-    padding-left: 2.25rem;
+    height: 2rem;
+    padding: 0 0.75rem 0 2.125rem;
     border-radius: 3px;
+    font-size: 0.875rem;
   }
 }
 
@@ -105,12 +126,9 @@
     width: auto;
   }
 
-  .topbar__center {
-    padding-left: 0;
-  }
-
   .topbar__brand-name,
-  .topbar__search {
+  .topbar__search,
+  .topbar__user-name {
     display: none;
   }
 }

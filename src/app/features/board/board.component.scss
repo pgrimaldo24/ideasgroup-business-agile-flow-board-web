@@ -71,6 +71,27 @@
   }
 }
 
+.board__alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 3px;
+  background: #ffeceb;
+  color: #ae2e24;
+  font-size: 0.8125rem;
+}
+
+.board__alert-close {
+  margin-left: auto;
+  padding: 0.125rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
 .board__columns {
   display: flex;
   flex: 1;

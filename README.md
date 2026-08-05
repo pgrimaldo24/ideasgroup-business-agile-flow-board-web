@@ -191,10 +191,11 @@ Hasta el momento: análisis del enunciado, selección y verificación de compati
 - [x] Shell de la aplicación: topbar, barra lateral y menú
 - [x] Componentes reutilizables: botón, campo de texto, tarjeta, grupo de formulario, diálogo, avatar y etiqueta
 - [x] Interfaz del tablero kanban con columnas, tarjetas y creación de tareas
-- [ ] Conexión del tablero y los proyectos con la API
+- [x] Drag & drop del tablero con actualización optimista y reversión visible
+- [x] Integración con `PATCH /api/tasks/{taskId}/reorder`
+- [ ] Carga del tablero y sus tareas desde la API
 - [ ] Gestión de proyectos (CRUD, paginación y filtro en servidor)
 - [ ] Columnas configurables del flujo de trabajo
-- [ ] Drag & drop con persistencia del orden y actualización optimista
 - [ ] Sincronización en tiempo real
 - [ ] Descarga de reportes PDF y Excel
 - [ ] Pruebas unitarias

@@ -14,6 +14,9 @@ export class BoardMessages {
     high: 'danger'
   };
 
+  static readonly reorderFailed =
+    'No se pudo guardar el nuevo orden. La tarea volvió a su posición anterior.';
+
   static readonly title: Record<string, string> = {
     required: 'El título de la tarea es obligatorio'
   };
