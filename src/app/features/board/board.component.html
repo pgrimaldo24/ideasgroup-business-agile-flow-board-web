@@ -1,34 +1,8 @@
 <div class="board">
   <header class="board__header">
     <p class="board__breadcrumb">Proyectos</p>
-
-    <div class="board__title-row">
-      <h1 class="board__title">{{ projectName }}</h1>
-      <app-button
-        label="Crear tarea"
-        icon="pi pi-plus"
-        variant="secondary"
-        (clicked)="openTaskDialog(store.columns()[0])"
-      />
-    </div>
+    <h1 class="board__title">Tablero</h1>
   </header>
-
-  <div class="board__toolbar">
-    <div class="board__search">
-      <i class="pi pi-search" aria-hidden="true"></i>
-      <app-text-input
-        [formControl]="search"
-        placeholder="Buscar en el tablero"
-        inputId="board-search"
-      />
-    </div>
-
-    <div class="board__members">
-      @for (member of members; track member) {
-        <app-avatar [fullName]="member" />
-      }
-    </div>
-  </div>
 
   @if (store.reorderFailed()) {
     <div class="board__alert" role="alert">
@@ -45,16 +19,30 @@
     </div>
   }
 
-  <div class="board__columns" cdkDropListGroup>
-    @for (column of store.columns(); track column.id) {
-      <app-board-column
-        [column]="column"
-        [tasks]="store.tasksByColumn().get(column.id) ?? []"
-        (taskCreated)="openTaskDialog($event)"
-        (taskMoved)="store.moveTask($event)"
-      />
-    }
-  </div>
+  @if (store.loading()) {
+    <p class="board__status">Cargando tablero…</p>
+  } @else {
+    <div class="board__columns" cdkDropListGroup>
+      @for (column of store.columns(); track column.id) {
+        <app-board-column
+          [column]="column"
+          [tasks]="store.tasksByColumn().get(column.id) ?? []"
+          (taskCreated)="openTaskDialog($event)"
+          (taskMoved)="store.moveTask($event)"
+        />
+      }
+
+      <button
+        class="board__add-column"
+        type="button"
+        [disabled]="store.creatingColumn()"
+        (click)="openColumnDialog()"
+      >
+        <i class="pi pi-plus" aria-hidden="true"></i>
+        Añadir columna
+      </button>
+    </div>
+  }
 </div>
 
 <app-dialog
@@ -79,11 +67,50 @@
       />
 
       <app-text-input
+        formControlName="description"
+        label="Descripción"
+        placeholder="Detalle opcional de la tarea"
+      />
+
+      <app-text-input
         formControlName="assigneeName"
         label="Responsable"
         placeholder="Nombre del responsable"
         required
         [errorMessages]="assigneeErrors"
+      />
+
+      <app-select-input
+        formControlName="priority"
+        label="Prioridad"
+        [options]="priorityOptions"
+        required
+        [errorMessages]="priorityErrors"
+      />
+    </app-form-group>
+  </form>
+</app-dialog>
+
+<app-dialog
+  header="Añadir columna"
+  confirmLabel="Añadir"
+  [visible]="columnDialogVisible()"
+  [loading]="store.creatingColumn()"
+  (visibleChange)="columnDialogVisible.set($event)"
+  (cancelled)="closeColumnDialog()"
+  (confirmed)="createColumn()"
+>
+  <form [formGroup]="columnForm">
+    <app-form-group
+      legend="Detalle de la columna"
+      description="Define una nueva fase del flujo de trabajo de este proyecto. Se añade al final del tablero."
+    >
+      <app-text-input
+        formControlName="name"
+        label="Nombre"
+        placeholder="Ej. Backlog, Diseño, QA…"
+        required
+        [errorMessages]="columnNameErrors"
       />
     </app-form-group>
   </form>

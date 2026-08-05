@@ -2,11 +2,6 @@
   <p class="task__title">{{ task.title }}</p>
 
   <div class="task__meta">
-    <span class="task__reference">
-      <i class="pi pi-check-square" aria-hidden="true"></i>
-      {{ task.reference }}
-    </span>
-
     <app-tag
       [label]="priorityLabel[task.priority]"
       [severity]="prioritySeverity[task.priority]"

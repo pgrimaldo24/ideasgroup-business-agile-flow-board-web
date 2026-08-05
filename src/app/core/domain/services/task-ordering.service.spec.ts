@@ -5,10 +5,9 @@ import { TaskOrderingService } from './task-ordering.service';
 function task(id: string, columnId: string, position: number): KanbanTask {
   return {
     id,
-    reference: `AFB-${id}`,
     title: `Tarea ${id}`,
     description: '',
-    priority: 'medium',
+    priority: 'Media',
     assigneeName: 'Ana Torres',
     columnId,
     position,

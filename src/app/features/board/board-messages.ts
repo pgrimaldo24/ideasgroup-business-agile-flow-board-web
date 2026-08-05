@@ -3,15 +3,17 @@ import { TagSeverity } from '@shared/ui/tag/tag.component';
 
 export class BoardMessages {
   static readonly priorityLabel: Record<TaskPriority, string> = {
-    low: 'Baja',
-    medium: 'Media',
-    high: 'Alta'
+    Baja: 'Baja',
+    Media: 'Media',
+    Alta: 'Alta',
+    Urgente: 'Urgente'
   };
 
   static readonly prioritySeverity: Record<TaskPriority, TagSeverity> = {
-    low: 'neutral',
-    medium: 'info',
-    high: 'danger'
+    Baja: 'neutral',
+    Media: 'info',
+    Alta: 'warning',
+    Urgente: 'danger'
   };
 
   static readonly reorderFailed =
@@ -23,5 +25,13 @@ export class BoardMessages {
 
   static readonly assignee: Record<string, string> = {
     required: 'Debes asignar un responsable'
+  };
+
+  static readonly priority: Record<string, string> = {
+    required: 'Debes seleccionar una prioridad'
+  };
+
+  static readonly columnName: Record<string, string> = {
+    required: 'El nombre de la columna es obligatorio'
   };
 }

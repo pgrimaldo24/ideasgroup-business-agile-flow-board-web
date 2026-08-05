@@ -2,7 +2,6 @@ import { TaskPriority } from './task-priority.model';
 
 export interface KanbanTask {
   readonly id: string;
-  readonly reference: string;
   readonly title: string;
   readonly description: string;
   readonly priority: TaskPriority;

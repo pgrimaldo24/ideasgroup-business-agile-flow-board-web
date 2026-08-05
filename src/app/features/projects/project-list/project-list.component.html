@@ -1,4 +1,82 @@
-<section class="page-placeholder">
-  <h1>Proyectos</h1>
-  <p>Pendiente de implementar: listado paginado con filtro por nombre y CRUD de proyectos.</p>
-</section>
+<div class="projects">
+  <header class="projects__header">
+    <h1 class="projects__title">Proyectos</h1>
+  </header>
+
+  @if (store.loading()) {
+    <p class="projects__status">Cargando proyectos…</p>
+  } @else if (store.projects().length === 0) {
+    <p class="projects__status">No se encontraron proyectos.</p>
+  } @else {
+    <div class="projects__list">
+      @for (project of store.projects(); track project.id) {
+        <app-card interactive (click)="openBoard(project.id)">
+          <div class="projects__row">
+            <div class="projects__row-main">
+              <p class="projects__row-name">{{ project.name }}</p>
+              <p class="projects__row-description">{{ project.description }}</p>
+            </div>
+            <span class="projects__row-status">{{ statusLabel[project.status] }}</span>
+          </div>
+        </app-card>
+      }
+    </div>
+
+    <div class="projects__pagination">
+      <button
+        class="projects__page-button"
+        type="button"
+        [disabled]="store.page() <= 1"
+        (click)="previousPage()"
+      >
+        <i class="pi pi-chevron-left" aria-hidden="true"></i>
+      </button>
+
+      <span class="projects__page-info">Página {{ store.page() }} de {{ store.totalPages() }}</span>
+
+      <button
+        class="projects__page-button"
+        type="button"
+        [disabled]="store.page() >= store.totalPages()"
+        (click)="nextPage()"
+      >
+        <i class="pi pi-chevron-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  }
+</div>
+
+<app-dialog
+  header="Crear proyecto"
+  confirmLabel="Crear"
+  [visible]="dialogVisible()"
+  (visibleChange)="dialogVisible.set($event)"
+  (cancelled)="closeCreateDialog()"
+  (confirmed)="createProject()"
+>
+  <form [formGroup]="projectForm">
+    <app-form-group legend="Detalle del proyecto">
+      <app-text-input
+        formControlName="name"
+        label="Nombre"
+        placeholder="Nombre del proyecto"
+        required
+        [errorMessages]="nameErrors"
+      />
+
+      <app-text-input
+        formControlName="description"
+        label="Descripción"
+        placeholder="Descripción opcional"
+      />
+
+      <app-select-input
+        formControlName="status"
+        label="Estado"
+        [options]="statusOptions"
+        required
+        [errorMessages]="statusErrors"
+      />
+    </app-form-group>
+  </form>
+</app-dialog>

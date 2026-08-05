@@ -14,10 +14,20 @@
   <div class="topbar__center">
     <div class="topbar__search">
       <i class="pi pi-search" aria-hidden="true"></i>
-      <app-text-input [formControl]="search" placeholder="Buscar" inputId="topbar-search" />
+      <app-text-input
+        [formControl]="search"
+        [placeholder]="searchPlaceholder()"
+        inputId="topbar-search"
+      />
     </div>
 
-    <app-button label="Crear" icon="pi pi-plus" variant="primary" />
+    <app-button
+      [label]="createLabel()"
+      icon="pi pi-plus"
+      variant="primary"
+      [disabled]="createDisabled()"
+      (clicked)="create()"
+    />
   </div>
 
   <div class="topbar__end">
