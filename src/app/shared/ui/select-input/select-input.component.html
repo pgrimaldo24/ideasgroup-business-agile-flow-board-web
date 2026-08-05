@@ -1,0 +1,29 @@
+@if (label) {
+  <label class="field__label" [attr.for]="inputId">
+    {{ label }}
+    @if (required) {
+      <span class="field__required" aria-hidden="true">*</span>
+    }
+  </label>
+}
+
+<p-dropdown
+  appendTo="body"
+  styleClass="field__control"
+  [inputId]="inputId"
+  [options]="dropdownOptions"
+  optionLabel="label"
+  optionValue="value"
+  [ngModel]="value"
+  [placeholder]="placeholder"
+  [disabled]="disabled"
+  [attr.aria-invalid]="errorMessage !== null"
+  [attr.aria-describedby]="errorMessage ? inputId + '-error' : null"
+  [panelStyleClass]="errorMessage !== null ? 'field__control--invalid' : ''"
+  (onChange)="onSelectionChange($event.value)"
+  (onBlur)="onBlur()"
+/>
+
+@if (errorMessage) {
+  <small class="field__error" [id]="inputId + '-error'" role="alert">{{ errorMessage }}</small>
+}

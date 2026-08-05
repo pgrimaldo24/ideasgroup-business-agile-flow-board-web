@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.field__label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #44546f;
+}
+
+.field__required {
+  margin-left: 0.125rem;
+  color: #c9372c;
+}
+
+.field__error {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #c9372c;
+}
+
+:host ::ng-deep .field__control {
+  width: 100%;
+}
