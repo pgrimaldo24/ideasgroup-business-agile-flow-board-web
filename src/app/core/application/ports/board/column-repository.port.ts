@@ -2,6 +2,7 @@ import { InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { BoardColumn } from '@core/domain/models/board/board-column.model';
+import { ColumnDraft } from '@core/domain/models/board/column-draft.model';
 import { KanbanTask } from '@core/domain/models/board/kanban-task.model';
 
 export interface BoardSnapshot {
@@ -11,6 +12,7 @@ export interface BoardSnapshot {
 
 export interface ColumnRepositoryPort {
   listByProject(projectId: string): Observable<BoardSnapshot>;
+  create(projectId: string, draft: ColumnDraft): Observable<BoardColumn>;
 }
 
 export const COLUMN_REPOSITORY_PORT = new InjectionToken<ColumnRepositoryPort>(
