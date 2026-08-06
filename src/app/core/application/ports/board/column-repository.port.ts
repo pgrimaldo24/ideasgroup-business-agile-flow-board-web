@@ -13,6 +13,9 @@ export interface BoardSnapshot {
 export interface ColumnRepositoryPort {
   listByProject(projectId: string): Observable<BoardSnapshot>;
   create(projectId: string, draft: ColumnDraft): Observable<BoardColumn>;
+  rename(columnId: string, name: string): Observable<BoardColumn>;
+  delete(columnId: string): Observable<void>;
+  reorder(columnId: string, targetIndex: number): Observable<BoardColumn>;
 }
 
 export const COLUMN_REPOSITORY_PORT = new InjectionToken<ColumnRepositoryPort>(
