@@ -15,7 +15,13 @@ import { BoardStore } from './board.store';
 class FakeColumnRepository implements ColumnRepositoryPort {
   snapshot: BoardSnapshot = { columns: [], tasks: [] };
   createResponse: Observable<BoardColumn> | null = null;
+  renameResponse: Observable<BoardColumn> | null = null;
+  deleteResponse: Observable<void> = of(undefined);
+  reorderResponse: Observable<BoardColumn> | null = null;
   lastCreate: { projectId: string; draft: ColumnDraft } | null = null;
+  lastRename: { columnId: string; name: string } | null = null;
+  lastDelete: string | null = null;
+  lastReorder: { columnId: string; targetIndex: number } | null = null;
 
   listByProject(): Observable<BoardSnapshot> {
     return of(this.snapshot);
@@ -27,6 +33,27 @@ class FakeColumnRepository implements ColumnRepositoryPort {
     return (
       this.createResponse ??
       of({ id: 'new-column', projectId, name: draft.name, position: 2 })
+    );
+  }
+
+  rename(columnId: string, name: string): Observable<BoardColumn> {
+    this.lastRename = { columnId, name };
+
+    return this.renameResponse ?? of({ id: columnId, projectId: 'p1', name, position: 0 });
+  }
+
+  delete(columnId: string): Observable<void> {
+    this.lastDelete = columnId;
+
+    return this.deleteResponse;
+  }
+
+  reorder(columnId: string, targetIndex: number): Observable<BoardColumn> {
+    this.lastReorder = { columnId, targetIndex };
+
+    return (
+      this.reorderResponse ??
+      of({ id: columnId, projectId: 'p1', name: 'Columna', position: targetIndex })
     );
   }
 }
@@ -235,5 +262,65 @@ describe('BoardStore', () => {
 
     expect(store.columns().map((column) => column.id)).toEqual(['todo', 'doing']);
     expect(store.creatingColumn()).toBeFalse();
+  });
+
+  it('renombra una columna y actualiza el estado', () => {
+    columnRepository.renameResponse = of({ id: 'todo', projectId: 'p1', name: 'Backlog', position: 0 });
+
+    let renamed: BoardColumn | undefined;
+    store.renameColumn('todo', 'Backlog').subscribe((column) => (renamed = column));
+
+    expect(columnRepository.lastRename).toEqual({ columnId: 'todo', name: 'Backlog' });
+    expect(renamed?.name).toBe('Backlog');
+    expect(store.columns().find((column) => column.id === 'todo')?.name).toBe('Backlog');
+  });
+
+  it('propaga el error si el renombrado falla', () => {
+    columnRepository.renameResponse = throwError(() => new Error('500'));
+
+    let failed = false;
+    store.renameColumn('todo', 'Backlog').subscribe({ error: () => (failed = true) });
+
+    expect(failed).toBeTrue();
+    expect(store.columns().find((column) => column.id === 'todo')?.name).toBe('Por hacer');
+  });
+
+  it('elimina una columna y sus tareas del estado', () => {
+    let completed = false;
+    store.deleteColumn('todo').subscribe({ complete: () => (completed = true) });
+
+    expect(columnRepository.lastDelete).toBe('todo');
+    expect(completed).toBeTrue();
+    expect(store.columns().map((column) => column.id)).toEqual(['doing']);
+    expect(store.tasks().some((task) => task.columnId === 'todo')).toBeFalse();
+  });
+
+  it('propaga el error si la eliminación falla, sin tocar el estado', () => {
+    columnRepository.deleteResponse = throwError(() => new Error('409'));
+
+    let failed = false;
+    store.deleteColumn('todo').subscribe({ error: () => (failed = true) });
+
+    expect(failed).toBeTrue();
+    expect(store.columns().map((column) => column.id)).toEqual(['todo', 'doing']);
+  });
+
+  it('aplica el reordenamiento de columnas antes de que responda el servidor', () => {
+    columnRepository.reorderResponse = of({ id: 'doing', projectId: 'p1', name: 'En curso', position: 0 });
+
+    store.reorderColumn('doing', 0);
+
+    expect(store.columns().map((column) => column.id)).toEqual(['doing', 'todo']);
+    expect(columnRepository.lastReorder).toEqual({ columnId: 'doing', targetIndex: 0 });
+    expect(store.columnReorderFailed()).toBeFalse();
+  });
+
+  it('revierte el orden de columnas y avisa cuando el servidor falla', () => {
+    columnRepository.reorderResponse = throwError(() => new Error('500'));
+
+    store.reorderColumn('doing', 0);
+
+    expect(store.columns().map((column) => column.id)).toEqual(['todo', 'doing']);
+    expect(store.columnReorderFailed()).toBeTrue();
   });
 });
