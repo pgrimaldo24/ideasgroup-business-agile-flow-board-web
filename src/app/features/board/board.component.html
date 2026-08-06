@@ -19,18 +19,45 @@
     </div>
   }
 
+  @if (store.columnReorderFailed()) {
+    <div class="board__alert" role="alert">
+      <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+      <span>{{ columnReorderError }}</span>
+      <button
+        class="board__alert-close"
+        type="button"
+        aria-label="Cerrar aviso"
+        (click)="store.dismissColumnReorderError()"
+      >
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
+    </div>
+  }
+
   @if (store.loading()) {
     <p class="board__status">Cargando tablero…</p>
   } @else {
-    <div class="board__columns" cdkDropListGroup>
-      @for (column of store.columns(); track column.id) {
-        <app-board-column
-          [column]="column"
-          [tasks]="store.tasksByColumn().get(column.id) ?? []"
-          (taskCreated)="openTaskDialog($event)"
-          (taskMoved)="store.moveTask($event)"
-        />
-      }
+    <div
+      class="board__columns"
+      cdkDropList
+      cdkDropListOrientation="horizontal"
+      [cdkDropListData]="store.columns()"
+      (cdkDropListDropped)="onColumnDrop($event)"
+    >
+      <div class="board__tasks-group" cdkDropListGroup>
+        @for (column of store.columns(); track column.id) {
+          <app-board-column
+            cdkDrag
+            cdkDragLockAxis="x"
+            [cdkDragData]="column"
+            [column]="column"
+            [tasks]="store.tasksByColumn().get(column.id) ?? []"
+            (taskCreated)="openTaskDialog($event)"
+            (taskMoved)="store.moveTask($event)"
+            (deleteRequested)="requestDeleteColumn($event)"
+          />
+        }
+      </div>
 
       <button
         class="board__add-column"
@@ -114,4 +141,24 @@
       />
     </app-form-group>
   </form>
+</app-dialog>
+
+<app-dialog
+  header="Eliminar columna"
+  confirmLabel="Eliminar"
+  [visible]="deleteColumnDialogVisible()"
+  [loading]="deletingColumn()"
+  (visibleChange)="deleteColumnDialogVisible.set($event)"
+  (cancelled)="closeDeleteColumnDialog()"
+  (confirmed)="confirmDeleteColumn()"
+>
+  <p>
+    ¿Eliminar la columna
+    <strong>{{ columnPendingDelete()?.name }}</strong>
+    ? Esta acción no se puede deshacer.
+  </p>
+
+  @if (deleteColumnError(); as message) {
+    <p class="board__dialog-error">{{ message }}</p>
+  }
 </app-dialog>

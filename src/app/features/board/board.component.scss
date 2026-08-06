@@ -60,6 +60,19 @@
   overflow-x: auto;
 }
 
+.board__tasks-group {
+  display: contents;
+}
+
+.board__dialog-error {
+  margin: 0.75rem 0 0;
+  padding: 0.625rem 0.75rem;
+  border-radius: 3px;
+  background: #ffeceb;
+  color: #ae2e24;
+  font-size: 0.8125rem;
+}
+
 .board__add-column {
   display: flex;
   align-items: flex-start;

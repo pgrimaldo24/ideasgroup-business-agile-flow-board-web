@@ -1,4 +1,5 @@
-import { DragDropModule } from '@angular/cdk/drag-drop';
+import { HttpErrorResponse } from '@angular/common/http';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -52,12 +53,16 @@ export class BoardComponent implements PageToolbarHandlers, OnInit {
 
   protected readonly dialogVisible = signal(false);
   protected readonly columnDialogVisible = signal(false);
+  protected readonly deleteColumnDialogVisible = signal(false);
+  protected readonly deletingColumn = signal(false);
+  protected readonly deleteColumnError = signal<string | null>(null);
 
   protected readonly titleErrors = BoardMessages.title;
   protected readonly assigneeErrors = BoardMessages.assignee;
   protected readonly priorityErrors = BoardMessages.priority;
   protected readonly columnNameErrors = BoardMessages.columnName;
   protected readonly reorderError = BoardMessages.reorderFailed;
+  protected readonly columnReorderError = BoardMessages.columnReorderFailed;
 
   protected readonly priorityOptions: readonly SelectOption<TaskPriority>[] = TASK_PRIORITIES.map(
     (priority) => ({ label: BoardMessages.priorityLabel[priority], value: priority })
@@ -75,6 +80,7 @@ export class BoardComponent implements PageToolbarHandlers, OnInit {
   });
 
   private readonly targetColumn = signal<BoardColumn | null>(null);
+  protected readonly columnPendingDelete = signal<BoardColumn | null>(null);
 
   readonly searchPlaceholder = 'Buscar en el tablero';
   readonly createLabel = 'Crear tarea';
@@ -143,5 +149,52 @@ export class BoardComponent implements PageToolbarHandlers, OnInit {
 
     this.store.createColumn(this.columnForm.getRawValue());
     this.closeColumnDialog();
+  }
+
+  protected onColumnDrop(event: CdkDragDrop<readonly BoardColumn[]>): void {
+    if (event.previousIndex === event.currentIndex) {
+      return;
+    }
+
+    const moved = this.store.columns()[event.previousIndex];
+
+    if (!moved) {
+      return;
+    }
+
+    this.store.reorderColumn(moved.id, event.currentIndex);
+  }
+
+  protected requestDeleteColumn(column: BoardColumn): void {
+    this.columnPendingDelete.set(column);
+    this.deleteColumnError.set(null);
+    this.deleteColumnDialogVisible.set(true);
+  }
+
+  protected closeDeleteColumnDialog(): void {
+    this.deleteColumnDialogVisible.set(false);
+    this.columnPendingDelete.set(null);
+  }
+
+  protected confirmDeleteColumn(): void {
+    const column = this.columnPendingDelete();
+
+    if (!column) {
+      return;
+    }
+
+    this.deletingColumn.set(true);
+    this.deleteColumnError.set(null);
+
+    this.store.deleteColumn(column.id).subscribe({
+      next: () => {
+        this.deletingColumn.set(false);
+        this.closeDeleteColumnDialog();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.deletingColumn.set(false);
+        this.deleteColumnError.set(BoardMessages.deleteColumnErrorMessage(error));
+      }
+    });
   }
 }
