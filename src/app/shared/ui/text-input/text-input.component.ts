@@ -1,4 +1,14 @@
-import { ChangeDetectorRef, Component, Input, Optional, Self, booleanAttribute, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  Optional,
+  Output,
+  Self,
+  booleanAttribute,
+  inject
+} from '@angular/core';
 import { ControlValueAccessor, NgControl } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 
@@ -25,6 +35,9 @@ export class TextInputComponent implements ControlValueAccessor {
   @Input() autocomplete = '';
   @Input() inputId = `app-text-input-${uniqueId++}`;
   @Input() errorMessages: Record<string, string> = {};
+
+  @Output() readonly blurred = new EventEmitter<void>();
+  @Output() readonly enterPressed = new EventEmitter<void>();
 
   protected value = '';
   protected disabled = false;
@@ -58,6 +71,11 @@ export class TextInputComponent implements ControlValueAccessor {
   protected onBlur(): void {
     this.onTouched();
     this.changeDetector.markForCheck();
+    this.blurred.emit();
+  }
+
+  protected onEnter(): void {
+    this.enterPressed.emit();
   }
 
   writeValue(value: string | null): void {

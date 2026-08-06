@@ -22,6 +22,7 @@
   [class.field__control--invalid]="errorMessage !== null"
   (input)="onInput($event)"
   (blur)="onBlur()"
+  (keydown.enter)="onEnter()"
 />
 
 @if (errorMessage) {
