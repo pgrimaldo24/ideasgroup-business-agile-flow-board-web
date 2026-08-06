@@ -1,7 +1,37 @@
 <section class="column">
-  <header class="column__header">
-    <h2 class="column__name">{{ column.name }}</h2>
-    <span class="column__count">{{ tasks.length }}</span>
+  <header class="column__header" cdkDragHandle>
+    @if (editing()) {
+      <app-text-input
+        class="column__rename"
+        [formControl]="nameControl"
+        [disabled]="renaming()"
+        (blurred)="confirmRename()"
+        (enterPressed)="confirmRename()"
+      />
+    } @else {
+      <h2 class="column__name">{{ column.name }}</h2>
+      <span class="column__count">{{ tasks.length }}</span>
+
+      <div class="column__actions">
+        <button
+          class="column__action"
+          type="button"
+          aria-label="Renombrar columna"
+          (click)="startEditing()"
+        >
+          <i class="pi pi-pencil" aria-hidden="true"></i>
+        </button>
+
+        <button
+          class="column__action"
+          type="button"
+          aria-label="Eliminar columna"
+          (click)="deleteRequested.emit(column)"
+        >
+          <i class="pi pi-trash" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
   </header>
 
   <div

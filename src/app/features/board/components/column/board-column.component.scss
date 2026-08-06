@@ -18,6 +18,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.375rem 0.5rem 0.75rem;
+  cursor: grab;
 }
 
 .column__name {
@@ -30,8 +31,45 @@
 }
 
 .column__count {
+  margin-right: auto;
   font-size: 0.75rem;
   color: #626f86;
+}
+
+.column__rename {
+  flex: 1;
+}
+
+.column__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+
+  .column:hover & {
+    opacity: 1;
+  }
+}
+
+.column__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: #626f86;
+  font-size: 0.75rem;
+  cursor: pointer;
+
+  &:hover {
+    background: #dfe1e6;
+    color: #172b4d;
+  }
 }
 
 .column__tasks {
