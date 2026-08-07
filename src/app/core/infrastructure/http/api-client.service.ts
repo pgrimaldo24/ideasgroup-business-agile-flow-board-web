@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -27,6 +27,10 @@ export class ApiClient {
 
   delete<TResponse>(path: string): Observable<TResponse> {
     return this.http.delete<TResponse>(this.resolve(path));
+  }
+
+  getBlob(path: string, params?: HttpParams): Observable<HttpResponse<Blob>> {
+    return this.http.get(this.resolve(path), { params, observe: 'response', responseType: 'blob' });
   }
 
   private resolve(path: string): string {

@@ -10,6 +10,13 @@
   padding: 1.25rem 1.5rem 0;
 }
 
+.board__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .board__breadcrumb {
   margin: 0 0 0.25rem;
   font-size: 0.75rem;
@@ -21,6 +28,35 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: #172b4d;
+}
+
+.board__reports {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.board__report-button {
+  &--pdf ::ng-deep .p-button {
+    color: #c9372c;
+    border-color: #c9372c;
+
+    &:enabled:hover {
+      background: #ffeceb;
+      border-color: #c9372c;
+    }
+  }
+
+  &--excel ::ng-deep .p-button {
+    color: #216e4e;
+    border-color: #216e4e;
+
+    &:enabled:hover {
+      background: #dcfff1;
+      border-color: #216e4e;
+    }
+  }
 }
 
 .board__status {

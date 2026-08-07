@@ -42,6 +42,8 @@ export class BoardMessages {
     required: 'El nombre de la columna es obligatorio'
   };
 
+  static readonly reportDownloadFailed = 'No se pudo descargar el reporte. Inténtalo de nuevo.';
+
   static deleteColumnErrorMessage(error: HttpErrorResponse): string {
     if (error.status === 409) {
       const body = error.error as { message?: string; detail?: string } | null;

@@ -13,13 +13,17 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { BoardStore } from '@core/application/state/board/board.store';
+import { DownloadReportUseCase } from '@core/application/use-cases/report/download-report.use-case';
 import { BoardColumn } from '@core/domain/models/board/board-column.model';
 import { TASK_PRIORITIES, TaskPriority } from '@core/domain/models/board/task-priority.model';
+import { ReportFormat } from '@core/domain/models/report/report-format.model';
+import { ButtonComponent } from '@shared/ui/button/button.component';
 import { DialogComponent } from '@shared/ui/dialog/dialog.component';
 import { FormGroupComponent } from '@shared/ui/form-group/form-group.component';
 import { SelectInputComponent } from '@shared/ui/select-input/select-input.component';
 import { SelectOption } from '@shared/ui/select-input/select-option.model';
 import { TextInputComponent } from '@shared/ui/text-input/text-input.component';
+import { FileDownloadService } from '@shared/utils/file-download.service';
 import { PageToolbarHandlers, PageToolbarService } from '@layout/page-toolbar.service';
 
 import { BoardColumnComponent } from './components/column/board-column.component';
@@ -32,6 +36,7 @@ import { BoardMessages } from './board-messages';
     DragDropModule,
     ReactiveFormsModule,
     BoardColumnComponent,
+    ButtonComponent,
     DialogComponent,
     FormGroupComponent,
     SelectInputComponent,
@@ -46,6 +51,8 @@ export class BoardComponent implements PageToolbarHandlers, OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly toolbar = inject(PageToolbarService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly downloadReportUseCase = inject(DownloadReportUseCase);
+  private readonly fileDownload = inject(FileDownloadService);
 
   protected readonly store = inject(BoardStore);
 
@@ -56,6 +63,8 @@ export class BoardComponent implements PageToolbarHandlers, OnInit {
   protected readonly deleteColumnDialogVisible = signal(false);
   protected readonly deletingColumn = signal(false);
   protected readonly deleteColumnError = signal<string | null>(null);
+  protected readonly downloadingFormat = signal<ReportFormat | null>(null);
+  protected readonly reportError = signal<string | null>(null);
 
   protected readonly titleErrors = BoardMessages.title;
   protected readonly assigneeErrors = BoardMessages.assignee;
@@ -194,6 +203,22 @@ export class BoardComponent implements PageToolbarHandlers, OnInit {
       error: (error: HttpErrorResponse) => {
         this.deletingColumn.set(false);
         this.deleteColumnError.set(BoardMessages.deleteColumnErrorMessage(error));
+      }
+    });
+  }
+
+  protected downloadReport(format: ReportFormat): void {
+    this.downloadingFormat.set(format);
+    this.reportError.set(null);
+
+    this.downloadReportUseCase.execute(this.projectId, format).subscribe({
+      next: (report) => {
+        this.fileDownload.save(report.blob, report.fileName);
+        this.downloadingFormat.set(null);
+      },
+      error: () => {
+        this.downloadingFormat.set(null);
+        this.reportError.set(BoardMessages.reportDownloadFailed);
       }
     });
   }

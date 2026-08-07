@@ -1,8 +1,47 @@
 <div class="board">
   <header class="board__header">
-    <p class="board__breadcrumb">Proyectos</p>
-    <h1 class="board__title">Tablero</h1>
+    <div class="board__heading">
+      <p class="board__breadcrumb">Proyectos</p>
+      <h1 class="board__title">Tablero</h1>
+    </div>
+
+    <div class="board__reports">
+      <app-button
+        class="board__report-button board__report-button--pdf"
+        label="PDF"
+        icon="pi pi-file-pdf"
+        variant="secondary"
+        [loading]="downloadingFormat() === 'pdf'"
+        [disabled]="downloadingFormat() !== null"
+        (clicked)="downloadReport('pdf')"
+      />
+
+      <app-button
+        class="board__report-button board__report-button--excel"
+        label="Excel"
+        icon="pi pi-file-excel"
+        variant="secondary"
+        [loading]="downloadingFormat() === 'xlsx'"
+        [disabled]="downloadingFormat() !== null"
+        (clicked)="downloadReport('xlsx')"
+      />
+    </div>
   </header>
+
+  @if (reportError(); as message) {
+    <div class="board__alert" role="alert">
+      <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+      <span>{{ message }}</span>
+      <button
+        class="board__alert-close"
+        type="button"
+        aria-label="Cerrar aviso"
+        (click)="reportError.set(null)"
+      >
+        <i class="pi pi-times" aria-hidden="true"></i>
+      </button>
+    </div>
+  }
 
   @if (store.reorderFailed()) {
     <div class="board__alert" role="alert">

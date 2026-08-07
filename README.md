@@ -63,8 +63,8 @@ Dependencias heredadas del andamiaje de Angular CLI: `@angular/{animations,commo
 | Paquete | Motivo del descarte |
 |---|---|
 | `chart.js` | Lo arrastra la plantilla Sakai únicamente para sus páginas de demostración, que se eliminan del proyecto. Sumaría peso al bundle sin uso real |
-| `xlsx` / `exceljs` | Los reportes PDF y Excel se generan en el backend a partir de un único DTO. El frontend solo descarga el archivo resultante |
-| `file-saver` | La descarga se resuelve con la API nativa `Blob` + `URL.createObjectURL`, lo que además permite leer la cabecera `Content-Disposition` para obtener el nombre de archivo real |
+| `xlsx` / `exceljs` | Los reportes PDF y Excel se generan en el backend a partir de un único DTO y una única consulta. El frontend solo descarga el archivo resultante desde `GET /api/projects/{id}/reports/{format}` |
+| `file-saver` | La descarga se resuelve con la API nativa `Blob` + `URL.createObjectURL` en `FileDownloadService`, lo que además permite leer la cabecera `Content-Disposition` para obtener el nombre de archivo real |
 
 ---
 
@@ -154,13 +154,66 @@ En producción las URLs son **relativas** (`/api`, `/hubs`) porque nginx hace de
 
 ---
 
-## Decisiones técnicas tomadas hasta el momento
+## Funcionalidad implementada
 
-**Drag & drop con Angular CDK en lugar de las directivas de PrimeNG.** El CDK ofrece listas conectadas mediante `cdkDropListGroup`, y las utilidades `moveItemInArray` / `transferArrayItem` entregan los índices de origen y destino ya calculados, que son la entrada directa del algoritmo de posicionamiento de tareas. Incluye además soporte de teclado. Las directivas `pDraggable` / `pDroppable` de PrimeNG requieren gestionar manualmente la conexión entre listas.
+### Autenticación y sesión
 
-**SignalR como canal de tiempo real.** Justificación y alternativas descartadas se documentan al implementarse.
+Login contra `POST /api/auth/login`. El token JWT y su `expiresAtUtc` se guardan en `sessionStorage` (no `localStorage`: la sesión no debe sobrevivir al cierre de la pestaña) a través de `SessionStore`, que programa un `setTimeout` para cerrar la sesión exactamente cuando el token expira, sin esperar a que una petición falle con 401.
 
-**Generación de reportes en el backend.** El frontend actúa solo como consumidor de la descarga, manteniendo una única fuente de datos para ambos formatos.
+- `authGuard` / `guestGuard` protegen las rutas del tablero y bloquean el acceso a `/auth/login` con sesión activa.
+- `authInterceptor` adjunta `Authorization: Bearer` a cada petición y, ante un 401 con sesión activa, cierra sesión y redirige al login.
+- `withComponentInputBinding()` enlaza `:projectId` de la URL directamente al `@Input` del componente del tablero.
+
+### Proyectos
+
+CRUD parcial (crear y listar, según lo que exige el reto) contra `GET/POST /api/projects`, con paginación y filtro por nombre **resueltos en servidor** — el buscador del topbar aplica `debounceTime` y dispara la búsqueda contra la API, no filtra en el cliente.
+
+### Columnas del flujo de trabajo
+
+CRUD completo, sin nombres de fase fijos en el código: cada proyecto define las columnas que necesita desde la interfaz.
+
+| Acción | Endpoint |
+|---|---|
+| Listar | `GET /api/projects/{projectId}/columns` |
+| Crear | `POST /api/projects/{projectId}/columns` |
+| Renombrar | `PUT /api/columns/{columnId}` |
+| Eliminar | `DELETE /api/columns/{columnId}` |
+| Reordenar | `PATCH /api/columns/{columnId}/reorder` |
+
+Renombrado in-place (clic en el lápiz del header, confirma con Enter o al perder el foco), eliminación con diálogo de confirmación que traduce el 409 del backend ("columna con tareas") a un mensaje explícito, y reordenamiento por arrastre horizontal con actualización optimista.
+
+### Tareas y tablero kanban
+
+Alta desde el popup "Crear tarea" (`POST /api/columns/{columnId}/tasks`) y reordenamiento por arrastre — dentro de una columna o entre columnas — contra `PATCH /api/tasks/{taskId}/reorder`.
+
+Las tareas de un proyecto **no** se cargan desde el campo `tasks` embebido en `BoardColumnDto`: ese campo llega vacío en la respuesta real del backend aunque el swagger lo documenta. En su lugar, `ColumnHttpAdapter.listByProject` pide primero las columnas y luego, por cada una, sus tareas con `GET /api/columns/{columnId}/tasks`, combinando ambas respuestas con `forkJoin`. Es la fuente de verdad explícita en vez de un campo anidado opcional.
+
+### Drag & drop y actualización optimista
+
+Angular CDK en lugar de las directivas de PrimeNG: `cdkDropListGroup` conecta listas automáticamente, y `CdkDragDrop` entrega el índice de destino ya calculado, que alimenta directamente `TaskOrderingService` (lógica pura en `core/domain/services/`, sin Angular, cubierta por pruebas unitarias — incluye el caso obligatorio del reto: cálculo de la nueva posición al reordenar).
+
+Tanto el movimiento de tareas como el de columnas siguen el mismo patrón en `BoardStore`: se aplica el cambio al estado local de inmediato (optimista), se envía la petición, y si falla se restaura el snapshot previo y se muestra una alerta descartable. Las directivas `pDraggable` / `pDroppable` de PrimeNG se descartaron por requerir conexión manual entre listas.
+
+### Tiempo real
+
+SignalR (`@microsoft/signalr`) contra el hub `/hubs/board`, autenticado con el mismo JWT de la sesión vía `accessTokenFactory`. `BoardSignalrAdapter` traduce los eventos del servidor (`TaskCreated`, `TaskUpdated`, `TaskMoved`, `TaskDeleted`) a un modelo de dominio propio (`BoardRealtimeEvent`) antes de que lleguen a `BoardStore`, que nunca conoce SignalR directamente — solo el puerto `BoardRealtimePort`.
+
+Al entrar al tablero, `BoardStore.connect()` se suscribe al grupo del proyecto (`SubscribeToBoard`) y se desuscribe (`UnsubscribeFromBoard`) al salir, evitando conexiones huérfanas.
+
+Alternativas descartadas: WebSocket crudo (exige construir agrupación por proyecto y reconexión a mano) y Server-Sent Events (unidireccional, sin agrupación nativa). SignalR resuelve ambas de fábrica y empareja naturalmente con un backend .NET.
+
+### Componentes reutilizables (`shared/ui/`)
+
+`button`, `text-input`, `select-input`, `card`, `form-group`, `dialog`, `avatar`, `tag`. Todos presentacionales (`@Input`/`@Output`, `OnPush`), sin inyectar servicios de negocio. `text-input` y `select-input` implementan `ControlValueAccessor` para integrarse con Reactive Forms como cualquier control nativo.
+
+### Generación de reportes
+
+Descarga contra `GET /api/projects/{projectId}/reports/{format}`, con `format` en `pdf` o `xlsx`. El frontend actúa solo como consumidor: PDF y Excel se generan en el backend a partir de un único DTO y una única consulta, así que ambos formatos siempre reflejan los mismos datos.
+
+- `ApiClient.getBlob()` pide la respuesta como `Blob` con acceso a cabeceras (`observe: 'response'`).
+- `extractFileName()` (`core/infrastructure/http/report/content-disposition.util.ts`) parsea `Content-Disposition` — soporta `filename*=UTF-8''...` (RFC 5987, para nombres con acentos o espacios) y `filename="..."` simple, con un nombre de reserva (`reporte.pdf` / `reporte.xlsx`) si el backend no envía la cabecera. Lógica pura, cubierta por pruebas unitarias sin `TestBed`.
+- `FileDownloadService` (`shared/utils/`) dispara la descarga real del blob mediante un enlace temporal (`URL.createObjectURL` + click + `URL.revokeObjectURL`), reutilizable para cualquier descarga futura de la aplicación.
+- Dos botones independientes ("PDF" / "Excel") en el header del tablero, cada uno con su propio estado de carga; ambos se deshabilitan mientras cualquiera de los dos descarga, para evitar disparos simultáneos.
 
 ---
 
@@ -172,43 +225,64 @@ La única corrección disponible es actualizar a Angular 22, lo que contradice e
 
 ---
 
+## Pruebas unitarias
+
+39 pruebas (Karma + Jasmine), ejecutables con `npm test`:
+
+| Suite | Qué cubre |
+|---|---|
+| `task-ordering.service.spec.ts` | Cálculo puro de la nueva posición al reordenar — misma columna, entre columnas, columna vacía, índice fuera de rango. Cubre el caso obligatorio del reto |
+| `board.store.spec.ts` | Carga del tablero, creación/renombrado/eliminación/reorden de columnas con reversión ante error, creación y reorden de tareas, aplicación de eventos de tiempo real, filtro de búsqueda |
+| `session.store.spec.ts` | Persistencia de sesión, expiración automática por `expiresAtUtc` |
+| `auth.guard.spec.ts` | Bloqueo de rutas sin sesión válida |
+| `content-disposition.util.spec.ts` | Extracción del nombre de archivo desde `Content-Disposition` en sus variantes, y el nombre de reserva cuando falta la cabecera |
+| `app.component.spec.ts` | Arranque del componente raíz |
+
+---
+
 ## Declaración de uso de asistentes de IA
 
-Se utiliza **Claude Code (Anthropic)** como asistente durante el desarrollo. Su alcance y las áreas específicas en las que intervino se detallan en esta sección conforme avanza el proyecto.
+Se utilizó **Claude Code (Anthropic)** como asistente durante todo el desarrollo. Alcance:
 
-Hasta el momento: análisis del enunciado, selección y verificación de compatibilidad de versiones de dependencias, definición de la estructura de carpetas y rutas, y redacción de este README.
+- Análisis del enunciado y planificación de la arquitectura hexagonal del frontend.
+- Selección y verificación de compatibilidad de versiones de dependencias.
+- Implementación de la estructura de carpetas, rutas, autenticación, CRUD de proyectos/columnas/tareas, tablero kanban con drag & drop, integración con SignalR y pruebas unitarias, siguiendo instrucciones y contratos de API (OpenAPI, endpoints de SignalR) proporcionados en cada paso.
+- Redacción de este README.
+
+Todas las decisiones de arquitectura, los contratos de API y las correcciones de comportamiento fueron dirigidas y validadas por el desarrollador en cada iteración.
 
 ---
 
 ## Estado del desarrollo
 
-- [x] Andamiaje del proyecto Angular 17
+- [x] Andamiaje del proyecto Angular 17 y arquitectura hexagonal de carpetas
 - [x] Instalación y verificación de dependencias
-- [x] Arquitectura de carpetas, rutas diferidas y providers base
 - [x] Configuración externa por archivos de entorno
-- [x] Autenticación: login contra la API, guard de ruta e interceptor JWT
-- [x] Sesión con expiración automática por `expiresAtUtc`
-- [x] Shell de la aplicación: topbar, barra lateral y menú
-- [x] Componentes reutilizables: botón, campo de texto, tarjeta, grupo de formulario, diálogo, avatar y etiqueta
-- [x] Interfaz del tablero kanban con columnas, tarjetas y creación de tareas
-- [x] Drag & drop del tablero con actualización optimista y reversión visible
-- [x] Integración con `PATCH /api/tasks/{taskId}/reorder`
-- [ ] Carga del tablero y sus tareas desde la API
-- [ ] Gestión de proyectos (CRUD, paginación y filtro en servidor)
-- [ ] Columnas configurables del flujo de trabajo
-- [ ] Sincronización en tiempo real
-- [ ] Descarga de reportes PDF y Excel
-- [ ] Pruebas unitarias
+- [x] Autenticación: login contra la API, guard de ruta, interceptor JWT y expiración automática de sesión
+- [x] Shell de la aplicación: topbar, barra lateral y menú, con buscador y acción "Crear" contextuales a la página activa
+- [x] Componentes reutilizables: botón, campo de texto, select, tarjeta, grupo de formulario, diálogo, avatar y etiqueta
+- [x] Gestión de proyectos: listar con paginación y filtro en servidor, crear
+- [x] Columnas configurables del flujo de trabajo: crear, renombrar, eliminar, reordenar
+- [x] Gestión de tareas: crear, mover entre columnas
+- [x] Tablero kanban con drag & drop, actualización optimista y reversión visible
+- [x] Sincronización en tiempo real vía SignalR
+- [x] Descarga de reportes PDF y Excel a partir de una única fuente de datos
+- [x] Búsqueda de tareas por texto en el tablero (opcional)
+- [x] Pruebas unitarias (39, incluida la del cálculo de posición)
+- [ ] Edición y eliminación de proyectos
+- [ ] Edición y eliminación de tareas desde el tablero
+- [ ] Filtros por responsable y prioridad (opcional)
+- [ ] Indicador de usuarios conectados (opcional)
 - [ ] Dockerización con nginx
 
 ---
 
 ## Pendiente de documentar
 
-Secciones que se completan a medida que se implementan:
+Estas secciones son responsabilidad del **backend** (repositorio .NET, distribuido por separado) y deben completarse ahí, no en este README:
 
-- Tecnología de tiempo real elegida y alternativas descartadas
-- Estrategia de índices de ordenamiento de tareas y columnas
-- Patrón aplicado en la exportación dual PDF / Excel
-- Diagrama del modelo de base de datos
-- Instrucciones de ejecución con Docker Compose
+- Diagrama del modelo de base de datos (a incrustar como imagen)
+- Instrucciones de ejecución con Docker Compose de la solución completa
+- Patrón aplicado en la exportación dual PDF / Excel (DTO y consulta compartidos entre ambos exportadores)
+
+Desde el frontend, la exportación dual se consume mediante un único endpoint parametrizado por formato (`GET /api/projects/{id}/reports/{format}`), sin lógica de generación ni de mapeo de datos en el cliente — ver [Generación de reportes](#funcionalidad-implementada).
